@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.*;
 
 public class SuffixArray {
+    // this main method is for task 1-4
     public static void main(String[] args){
         Scanner s = new Scanner(System.in);
 
@@ -17,7 +18,29 @@ public class SuffixArray {
         searchFromFiles(paths, query);
     }
 
-    // take one or multiple file paths and search from those files
+    // search from a page and print the result
+    public static void searchFromPage(Page p, String query) {
+        int[] sufAry = getSuffixArray(p.content);
+        int[] ocrAry = findOccurrences(query, p.content, sufAry);
+
+        // continue if query is not found for this page
+        if (ocrAry.length == 0) {
+            return;
+        }
+
+        System.out.printf("\"%s\" found in %s\n", query, p.url);
+
+        for (int o : ocrAry) {
+            if (o + query.length() + 20 < p.content.length()) {
+                System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1, o + query.length() + 19));
+            } else {
+                System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1));
+            }
+        }
+    }
+
+    // take multiple files, concatenate the contents and search from it
+    // not memory efficient at all, but it is the specification for task 1-4
     public static void searchFromFiles(String[] paths, String query){
         StringBuilder sb = new StringBuilder();
         String text;
@@ -35,22 +58,11 @@ public class SuffixArray {
             }
         }
 
-        // str is the text of all files concatenated
+        // str is the string of all files concatenated
         String str = new String(sb);
 
-        // generate and print suffix array
         int[] sufAry = getSuffixArray(str);
 
-        /*
-        System.out.println();
-        System.out.println("Generated suffix array: ");
-        for(int i=0; i<str.length(); i++){
-            System.out.printf("%d ", sufAry[i]);
-        }
-        System.out.println();
-        */
-
-        // find and print occurrences
         int[] ocrAry = findOccurrences(query, str, sufAry);
 
         // stores the sum of the lengths of preceding files
@@ -92,14 +104,6 @@ public class SuffixArray {
         // sort alphabetically
         Arrays.sort(ary);
 
-        /*
-        System.out.println();
-        System.out.println("Sorted array:");
-        for(String s : ary){
-            System.out.println(s);
-        }
-        */
-
         // determine sufAry
         for(int i=0; i<sufAry.length; i++){
             sufAry[i] = str.length() - ary[i].length() + 1;
@@ -121,15 +125,16 @@ public class SuffixArray {
 
             substr = str.substring(sufAry[idx] - 1);
 
+            // if found
             if(substr.startsWith(query)){
                 break;
             }
 
-            // str is before substr
+            // if str is before substr
             if(query.compareToIgnoreCase(substr) < 0){
                 max = idx;
             }
-            // str is after substr
+            // if str is after substr
             else if(query.compareToIgnoreCase(substr) > 0){
                 min = idx + 1;
             }
@@ -143,7 +148,7 @@ public class SuffixArray {
                 break;
             }
             idx--;
-        } while(idx>0);
+        } while(idx > 0);
 
         // now go ahead and put the indices of occurrence into ocrList
         do{
@@ -153,7 +158,7 @@ public class SuffixArray {
             }
             ocrList.add(sufAry[idx]);
             idx++;
-        }while(idx < sufAry.length);
+        } while(idx < sufAry.length);
 
         // convert ArrayList<Integer> to int[]
         int[] ocrAry = new int[ocrList.size()];

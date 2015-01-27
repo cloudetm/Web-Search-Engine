@@ -13,11 +13,9 @@ public class Crawler {
     private String host;
     private ArrayList<URL> visitedUrlList;
     private int timeoutMillis = 5000;
-
-    public static void main(String[] args) {
-        Crawler c = new Crawler("http://www.osss.cs.tsukuba.ac.jp/kato/codeconv/CodeConvTOC.doc.html");
-        c.crawl();
-    }
+    public ArrayList<Page> pages = new ArrayList<Page>(); // list of pages crawled
+    private String query;
+    private boolean isSearching;
 
     public Crawler(String baseUrl){
         try{
@@ -33,24 +31,34 @@ public class Crawler {
         visitedUrlList = new ArrayList<URL>();
     }
 
-    // start crawling
-    public void crawl(){
-        crawl(baseUrl);
+    public Crawler(String baseUrl, String query){
+        this(baseUrl);
+        this.query = query;
+        this.isSearching = true;
     }
 
-    // crawl starting from baseUrl
+    // start crawling
+    // return the list of pages crawled
+    public ArrayList<Page> crawl(){
+        crawl(baseUrl);
+        return pages;
+    }
+
+    // crawl the given url and urls linked from it
     private void crawl(URL url){
         visitedUrlList.add(url);
 
         try{
             Document doc = Jsoup.parse(url, timeoutMillis);
+            String content = doc.text();
+            Page p = new Page(url.toString(), content);
+            pages.add(p);
+
+            if(isSearching){
+                SuffixArray.searchFromPage(p, query);
+            }
 
             ArrayList<URL> urlList = getUrlList(doc, true);
-            System.out.printf("%s contains %d links.\n", url, urlList.size());
-
-            for(URL u : urlList){
-                System.out.printf("\t%s\n", u);
-            }
 
             for(URL u : urlList){
                 if(u.getHost().equals(host) && !visitedUrlList.contains(u)){
