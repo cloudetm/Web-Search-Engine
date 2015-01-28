@@ -13,7 +13,7 @@ public class Crawler {
     private String host;
     private ArrayList<URL> visitedUrlList;
     private final int timeoutMillis = 5000;
-    private ArrayList<Page> pages = new ArrayList<Page>(); // list of pages crawled
+    private ArrayList<Page> pages = new ArrayList<Page>(); // list of pages in this closure of web pages
     private Query query;
     private boolean isSearching;
 
