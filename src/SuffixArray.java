@@ -19,24 +19,77 @@ public class SuffixArray {
     }
 
     // search from a page and print the result
-    public static void searchFromPage(Page p, String query) {
+    public static int searchFromPage(Page p, Query q) {
         int[] sufAry = getSuffixArray(p.content);
-        int[] ocrAry = findOccurrences(query, p.content, sufAry);
+        int[] ocrAry;
+        int orFound = 0;
+        int andFound = 0;
 
-        // continue if query is not found for this page
-        if (ocrAry.length == 0) {
+        HashMap<String, int[]> orOcr = new HashMap<String, int[]>();
+        HashMap<String, int[]> andOcr = new HashMap<String, int[]>();
+
+        // return if a "not" keyword is found
+        for(String notq : q.not){
+            ocrAry = findOccurrences(notq, p.content, sufAry);
+            if(ocrAry.length > 0) {
+                return 0;
+            }
+        }
+
+        // find occurrences of "and" keywords
+        for(String andq : q.and){
+            ocrAry = findOccurrences(andq, p.content, sufAry);
+            if(ocrAry.length > 0) {
+                andFound += ocrAry.length;
+                andOcr.put(andq, ocrAry);
+            }
+            // return if not found
+            else{
+                return 0;
+            }
+        }
+
+        // find occurrences of "or" keywords
+        for(String orq : q.or){
+            ocrAry = findOccurrences(orq, p.content, sufAry);
+            if(ocrAry.length > 0) {
+                orFound += ocrAry.length;
+                orOcr.put(orq, ocrAry);
+            }
+        }
+
+        return andFound + orFound;
+
+        /*
+        if(orOcr.size() > 0){
+            System.out.printf("\"%s\" found in %s\n", q.query, p.url);
+        }
+        else{
             return;
         }
 
-        System.out.printf("\"%s\" found in %s\n", query, p.url);
-
-        for (int o : ocrAry) {
-            if (o + query.length() + 20 < p.content.length()) {
-                System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1, o + query.length() + 19));
-            } else {
-                System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1));
+        // print results for "and" keywords
+        for (Map.Entry<String, int[]> ocr : andOcr.entrySet()) {
+            for(int o : ocr.getValue()) {
+                if (o + ocr.getKey().length() + 20 < p.content.length()) {
+                    System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1, o + ocr.getKey().length() + 19));
+                } else {
+                    System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1));
+                }
             }
         }
+
+        // print results for "or" keywords
+        for (Map.Entry<String, int[]> ocr : orOcr.entrySet()) {
+            for(int o : ocr.getValue()) {
+                if (o + ocr.getKey().length() + 20 < p.content.length()) {
+                    System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1, o + ocr.getKey().length() + 19));
+                } else {
+                    System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1));
+                }
+            }
+        }
+        */
     }
 
     // take multiple files, concatenate the contents and search from it
@@ -131,11 +184,11 @@ public class SuffixArray {
             }
 
             // if str is before substr
-            if(query.compareToIgnoreCase(substr) < 0){
+            if(query.compareTo(substr) < 0){
                 max = idx;
             }
             // if str is after substr
-            else if(query.compareToIgnoreCase(substr) > 0){
+            else if(query.compareTo(substr) > 0){
                 min = idx + 1;
             }
         }

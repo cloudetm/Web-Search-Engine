@@ -12,9 +12,9 @@ public class Crawler {
     private URL baseUrl;
     private String host;
     private ArrayList<URL> visitedUrlList;
-    private int timeoutMillis = 5000;
+    private final int timeoutMillis = 5000;
     public ArrayList<Page> pages = new ArrayList<Page>(); // list of pages crawled
-    private String query;
+    private Query query;
     private boolean isSearching;
 
     public Crawler(String baseUrl){
@@ -31,7 +31,7 @@ public class Crawler {
         visitedUrlList = new ArrayList<URL>();
     }
 
-    public Crawler(String baseUrl, String query){
+    public Crawler(String baseUrl, Query query){
         this(baseUrl);
         this.query = query;
         this.isSearching = true;
