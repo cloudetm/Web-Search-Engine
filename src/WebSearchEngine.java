@@ -2,30 +2,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 
+// Runner
 public class WebSearchEngine {
     public static void main(String[] args){
-        Scanner in = new Scanner(System.in);
-        String baseUrl;
-        Query query;
+        String baseUrl = "http://www.osss.cs.tsukuba.ac.jp/kato/codeconv/CodeConvTOC.doc.html";
+        Query query = new Query("Java &Programming -Practices");
 
-        System.out.println("Enter a website to search from:");
-        baseUrl = in.nextLine();
-        System.out.println("Enter words to search for:");
-        query = new Query(in.nextLine());
+        System.out.printf("Searching from %s\n", baseUrl);
+        System.out.printf("Searching for: %s\n", query.query);
 
         Crawler c = new Crawler(baseUrl);
 
         ArrayList<Page> pages = c.crawl();
 
         for(Page p : pages){
-            p.hit = SuffixArray.searchFromPage(p, query);
+            p.found = SuffixArray.searchFromPage(p, query);
         }
 
         Collections.sort(pages);
 
         for(Page p : pages){
-            if(p.hit > 0) {
-                System.out.printf("%d\tfound in %s\n", p.hit, p.url);
+            if(p.found > 0) {
+                System.out.printf("%d\tfound in %s\n", p.found, p.url);
             }
         }
     }

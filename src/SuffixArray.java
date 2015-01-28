@@ -18,10 +18,9 @@ public class SuffixArray {
         searchFromFiles(paths, query);
     }
 
-    // search from a page and print the result
-    public static int searchFromPage(Page p, Query q) {
-        int[] sufAry = getSuffixArray(p.content);
-        int[] ocrAry;
+    // search from a page and return the number that a word in the query was found in the page
+    public static int searchFromPage(Page page, Query query) {
+        int[] sufAry = getSuffixArray(page.content);
         int orFound = 0;
         int andFound = 0;
 
@@ -29,16 +28,16 @@ public class SuffixArray {
         HashMap<String, int[]> andOcr = new HashMap<String, int[]>();
 
         // return if a "not" keyword is found
-        for(String notq : q.not){
-            ocrAry = findOccurrences(notq, p.content, sufAry);
+        for(String notq : query.not){
+            int[] ocrAry = findOccurrences(notq, page.content, sufAry);
             if(ocrAry.length > 0) {
                 return 0;
             }
         }
 
         // find occurrences of "and" keywords
-        for(String andq : q.and){
-            ocrAry = findOccurrences(andq, p.content, sufAry);
+        for(String andq : query.and){
+            int[] ocrAry = findOccurrences(andq, page.content, sufAry);
             if(ocrAry.length > 0) {
                 andFound += ocrAry.length;
                 andOcr.put(andq, ocrAry);
@@ -50,8 +49,8 @@ public class SuffixArray {
         }
 
         // find occurrences of "or" keywords
-        for(String orq : q.or){
-            ocrAry = findOccurrences(orq, p.content, sufAry);
+        for(String orq : query.or){
+            int[] ocrAry = findOccurrences(orq, page.content, sufAry);
             if(ocrAry.length > 0) {
                 orFound += ocrAry.length;
                 orOcr.put(orq, ocrAry);
@@ -59,37 +58,6 @@ public class SuffixArray {
         }
 
         return andFound + orFound;
-
-        /*
-        if(orOcr.size() > 0){
-            System.out.printf("\"%s\" found in %s\n", q.query, p.url);
-        }
-        else{
-            return;
-        }
-
-        // print results for "and" keywords
-        for (Map.Entry<String, int[]> ocr : andOcr.entrySet()) {
-            for(int o : ocr.getValue()) {
-                if (o + ocr.getKey().length() + 20 < p.content.length()) {
-                    System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1, o + ocr.getKey().length() + 19));
-                } else {
-                    System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1));
-                }
-            }
-        }
-
-        // print results for "or" keywords
-        for (Map.Entry<String, int[]> ocr : orOcr.entrySet()) {
-            for(int o : ocr.getValue()) {
-                if (o + ocr.getKey().length() + 20 < p.content.length()) {
-                    System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1, o + ocr.getKey().length() + 19));
-                } else {
-                    System.out.printf("\t%d:\t%s\n", o, p.content.substring(o - 1));
-                }
-            }
-        }
-        */
     }
 
     // take multiple files, concatenate the contents and search from it
@@ -145,7 +113,7 @@ public class SuffixArray {
     }
 
     // create and return a suffix array for a given string
-    private static int[] getSuffixArray(String str){
+    public static int[] getSuffixArray(String str){
         int[] sufAry = new int[str.length()];
         String[] ary = new String[str.length()];
 
@@ -166,7 +134,7 @@ public class SuffixArray {
     }
 
     // return the indices of occurrences as an array
-    private static int[] findOccurrences(String query, String str, int[] sufAry){
+    public static int[] findOccurrences(String query, String str, int[] sufAry){
         ArrayList<Integer> ocrList = new ArrayList<Integer>();
 
         int min = 0, max = sufAry.length, idx = 0;

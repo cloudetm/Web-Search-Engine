@@ -1,9 +1,7 @@
-import java.util.Comparator;
-
 public class Page implements Comparable{
     public String url;
     public String content;
-    public int hit;
+    public int found; // this shouldn't really be here but it's here for the ease of implementation
 
     Page(String url, String content){
         this.url = url;
@@ -12,6 +10,6 @@ public class Page implements Comparable{
 
     public int compareTo(Object o){
         Page p = (Page)o;
-        return p.hit - this.hit;
+        return p.found - this.found;
     }
 }
